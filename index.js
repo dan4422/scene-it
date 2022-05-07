@@ -8,7 +8,7 @@ function renderMovies(movies) {
             <div class="card-body bg-dark text-white text-center">
                 <h5 class="card-title">${currentMovie.Title}</h5>
                 <h6 class="text-white">${currentMovie.Year}</h6>
-                <button class="bg-info" type="submit">Add</button>
+                <button class="bg-info add-button" data-imdbid="${currentMovie.imdbID}" type="submit">Add</button>
             </div>
         </div>`
     })
@@ -23,8 +23,31 @@ myForm.addEventListener('submit', (e) => {
     fetch(`http://www.omdbapi.com/?apikey=59354c85&s=${urlEncodedSearchString}`)
         .then(res => res.json())
         .then(data => {
-            console.log(data)
             renderMovies(data.Search)
+            movieData = data.Search
         })
     myForm.reset()
 })
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('add-button')) {
+        const movieID = e.target.dataset.imdbid
+        saveToWatchList(movieID)
+    }
+})
+
+function saveToWatchList(movieID) {
+    const movie = movieData.find((currentMovie) => {
+        return currentMovie.imdbID == movieID
+    })
+    let watchlistJSON = localStorage.getItem('watchlist')
+    let watchlist = JSON.parse(watchlistJSON)
+
+    if (watchlist == null) {
+        watchlist = []
+    }
+
+    watchlist.push(movie)
+    watchlistJSON = JSON.stringify(watchlist)
+    localStorage.setItem('watchlist', watchlistJSON)
+}
